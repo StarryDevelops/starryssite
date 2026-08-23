@@ -209,6 +209,157 @@
             color:#444;
         }
 
+        /* music player */
+        #musicbox {
+            overflow:hidden;
+            min-width:0;
+        }
+
+        #musicbox .np {
+            text-align:center;
+            padding:2px 0 5px;
+            border-bottom:1px dashed #ffb3c6;
+            margin-bottom:4px;
+            overflow:hidden;
+            min-width:0;
+        }
+
+        #musicbox .np small {
+            display:block;
+            font:8px 'silkscreen', arial;
+            text-transform:uppercase;
+            letter-spacing:2px;
+            color:#ff4d8d;
+            margin-bottom:2px;
+        }
+
+        #nptitle {
+            display:block;
+            font:bold 10px calibri;
+            color:#d90429;
+            text-transform:uppercase;
+            letter-spacing:2px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            min-width:0;
+            max-width:100%;
+        }
+
+        #seekrow {
+            display:flex;
+            align-items:center;
+            gap:3px;
+            margin:4px 0;
+            min-width:0;
+        }
+
+        #seekrow span {
+            font:8px 'silkscreen', arial;
+            color:#c73b5d;
+            width:22px;
+            text-align:center;
+            flex:0 0 auto;
+        }
+
+        #seekbar {
+            min-width:0;
+            width:0;
+            flex:1 1 auto;
+            accent-color:#d90429;
+            cursor:pointer;
+        }
+
+        #controls {
+            display:flex;
+            justify-content:center;
+            gap:6px;
+            margin-bottom:6px;
+        }
+
+        #controls button {
+            background:#ffb3c6;
+            border:1px solid #ff4d8d;
+            border-radius:10px;
+            color:#fff;
+            font:10px 'silkscreen', arial;
+            padding:3px 8px;
+            cursor:pointer;
+            letter-spacing:1px;
+        }
+
+        #controls button:hover {
+            color:#d90429;
+        }
+
+        #controls button:active {
+            transform:translateY(1px);
+        }
+
+        #tracklist {
+            list-style:none;
+            margin:0;
+            padding:0;
+        }
+
+        #tracklist li {
+            display:flex;
+            align-items:center;
+            gap:4px;
+            padding:3px 4px;
+            border-bottom:1px dashed #ffb3c6;
+            font:9px calibri;
+            color:#c73b5d;
+            letter-spacing:1px;
+            cursor:pointer;
+        }
+
+        #tracklist li:last-child {
+            border-bottom:0;
+        }
+
+        #tracklist li:hover {
+            background:#ffb3c6;
+            color:#fff;
+        }
+
+        #tracklist li.playing {
+            background:#ffd6e4;
+            color:#d90429;
+            font-weight:bold;
+        }
+
+        .eq {
+            display:none;
+            align-items:flex-end;
+            gap:1px;
+            height:8px;
+            flex:0 0 auto;
+        }
+
+        #tracklist li.playing .eq {
+            display:inline-flex;
+        }
+
+        .eq span {
+            width:2px;
+            background:#d90429;
+            animation:eqbounce 0.6s infinite alternate;
+        }
+
+        .eq span:nth-child(2) {
+            animation-delay:0.2s;
+        }
+
+        .eq span:nth-child(3) {
+            animation-delay:0.4s;
+        }
+
+        @keyframes eqbounce {
+            from { height:2px; }
+            to { height:8px; }
+        }
+
         @media (max-width:600px) {
             body {
                 font-size:11px;
@@ -235,6 +386,7 @@
             }
 
             #left,
+            #right,
             #content {
                 width:100%;
                 padding:6px;
@@ -335,7 +487,7 @@
                         <div class="post-title">Best Friends :P</div>
                     </div>
                 </div>
-                SKY ❤💕❤💕❤❤, rainy, Vanilla, Neptune, Anthony, Mara, Anny, Yuyu and maybe you 👀
+                SKY ❤💕❤💕❤❤, rainy, Vanilla, Neptune, qx9z, Mara, Anny, Yuyu and maybe you 👀
             </div>
 
             <div class="scrollbox">
@@ -373,7 +525,33 @@
 
             <div class="box">
                 <div class="title">Status...⟳</div>
-                NOT vibecoding!
+                NOT vibecoding! grr
+            </div>
+
+            <!-- music player :D -->
+            <div class="box" id="musicbox">
+                <div class="title">♫ music ♫</div>
+
+                <div class="np">
+                    <small>now playing</small>
+                    <span id="nptitle"></span>
+                </div>
+
+                <audio id="player" preload="metadata"></audio>
+
+                <div id="seekrow">
+                    <span id="curtime">0:00</span>
+                    <input type="range" id="seekbar" min="0" max="1000" value="0" step="1">
+                    <span id="dur">0:00</span>
+                </div>
+
+                <div id="controls">
+                    <button id="prevbtn" title="previous track">◀◀</button>
+                    <button id="playbtn" title="play / pause">▶</button>
+                    <button id="nextbtn" title="next track">▶▶</button>
+                </div>
+
+                <ul id="tracklist"></ul>
             </div>
 
             <div class="box">
@@ -396,5 +574,121 @@
     </div>                            <!--please for gods sake do not touch all these divs, otherwise youll get a headache :c-->
 
 </div>
+
+    <script>
+        // songs live in the songs/ folder :D add new ones to this list!
+        var SONGS = [
+            { src: "songs/I dont like me eitherr.mp3", title: "I dont like me eitherr" },
+            { src: "songs/Scott Pilgrim vs. the World Ruined a Whole Generation of Women.mp3", title: "Scott Pilgrim vs. the World Ruined a Whole Generation of Women" },
+            { src: "songs/Vanilla.mp3", title: "Vanilla" }
+        ];
+
+        (function () {
+            var player = document.getElementById('player');
+            var playbtn = document.getElementById('playbtn');
+            var prevbtn = document.getElementById('prevbtn');
+            var nextbtn = document.getElementById('nextbtn');
+            var seekbar = document.getElementById('seekbar');
+            var curtime = document.getElementById('curtime');
+            var dur = document.getElementById('dur');
+            var nptitle = document.getElementById('nptitle');
+            var list = document.getElementById('tracklist');
+
+            var current = 0;
+            var wasPlaying = false;
+
+            function fmt(t) {
+                if (isNaN(t)) return '0:00';
+                var m = Math.floor(t / 60);
+                var s = Math.floor(t % 60);
+                return m + ':' + (s < 10 ? '0' : '') + s;
+            }
+
+            function renderList() {
+                SONGS.forEach(function (song, i) {
+                    var li = document.createElement('li');
+
+                    var eq = document.createElement('span');
+                    eq.className = 'eq';
+                    eq.innerHTML = '<span></span><span></span><span></span>';
+                    li.appendChild(eq);
+
+                    li.appendChild(document.createTextNode(song.title));
+                    li.addEventListener('click', function () { playAt(i); });
+                    list.appendChild(li);
+                });
+            }
+
+            function highlight() {
+                for (var i = 0; i < list.children.length; i++) {
+                    list.children[i].classList.toggle('playing', i === current);
+                }
+            }
+
+            function setTrack(i) {
+                current = (i + SONGS.length) % SONGS.length;
+                player.src = SONGS[current].src;
+                nptitle.textContent = SONGS[current].title;
+                dur.textContent = '0:00';
+                curtime.textContent = '0:00';
+                seekbar.value = 0;
+                highlight();
+            }
+
+            function playAt(i) {
+                if (i !== current) setTrack(i);
+                player.play();
+            }
+
+            playbtn.addEventListener('click', function () {
+                if (player.paused) player.play();
+                else player.pause();
+            });
+
+            nextbtn.addEventListener('click', function () {
+                var keep = wasPlaying;
+                setTrack(current + 1);
+                if (keep) player.play();
+            });
+
+            prevbtn.addEventListener('click', function () {
+                if (player.currentTime > 3) { player.currentTime = 0; return; }
+                var keep = wasPlaying;
+                setTrack(current - 1);
+                if (keep) player.play();
+            });
+
+            seekbar.addEventListener('input', function () {
+                if (player.duration) {
+                    player.currentTime = seekbar.value / 1000 * player.duration;
+                }
+            });
+
+            player.addEventListener('play', function () {
+                wasPlaying = true;
+                playbtn.textContent = '❚❚';
+            });
+            player.addEventListener('pause', function () {
+                wasPlaying = false;
+                playbtn.textContent = '▶';
+            });
+            player.addEventListener('ended', function () {
+                setTrack(current + 1);
+                player.play();
+            });
+            player.addEventListener('timeupdate', function () {
+                if (player.duration) {
+                    seekbar.value = player.currentTime / player.duration * 1000;
+                    curtime.textContent = fmt(player.currentTime);
+                }
+            });
+            player.addEventListener('loadedmetadata', function () {
+                dur.textContent = fmt(player.duration);
+            });
+
+            renderList();
+            setTrack(0);
+        })();
+    </script>
 </body>
 </html>
